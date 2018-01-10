@@ -105,8 +105,6 @@ class matrixConnector:
         message = event["content"]["body"]
         roomId = event["room_id"]
         matrixConnector.onMessage(message, roomId)
-        print(matrixConnector.username)
-        print(event)
 
     def sendMessage(self, message, roomId):
         # Let the bot say something
