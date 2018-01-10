@@ -95,7 +95,8 @@ class zabbixBotClass:
                                                         selectHosts=['host'],
                                                         sortfield='lastchange',
                                                         sortorder='DESC',
-                                                        limit=10
+                                                        limit=10,
+                                                        maintenance=False
                                                         )
 
         this_message = ""
@@ -111,7 +112,8 @@ class zabbixBotClass:
 
             """ Example 2 """
             this_message = this_message + \
-                str(time.strftime('%d-%m-%y %H:%m', time.gmtime(int(trigger['lastchange'])))) + \
+                str(time.strftime('%d-%m-%y %H:%m:%S', time.gmtime(int(trigger['lastchange'])))) + \
+                " | <font color=" + zabbixBotClass.__zabbixConvertIntToTriggerStatus(trigger['value'])['color'] + ">" + zabbixBotClass.__zabbixConvertIntToTriggerStatus(trigger['value'])['name'] + "</font>"+ \
                 " | <font color=#92ff24>" + trigger['hosts'][0]['host'] + "</font>" + \
                 " | <font color=" + zabbixBotClass.__zabbixConvertIntToSeveritie(trigger['priority'])['color'] + ">" + trigger['description'] + "</font>" + \
                 " | <font color=" + zabbixBotClass.__zabbixConvertIntToSeveritie(trigger['priority'])['color'] + ">" + zabbixBotClass.__zabbixConvertIntToSeveritie(trigger['priority'])['name'] + "</font>" + \
@@ -152,34 +154,49 @@ class zabbixBotClass:
 
     def __zabbixConvertIntToSeveritie(severitieNumber):
         severitieNumberInt = int(severitieNumber)
-        if severitieNumberInt == 1:
+        if severitieNumberInt == 5:
             return {
                 'name': 'Disaster',
                 'color': '#E45959',
-                'number': 1 }
-        if severitieNumberInt == 2:
+                'number': 5 }
+        if severitieNumberInt == 4:
             return {
                 'name': 'High',
                 'color': '#E97659',
-                'number': 2 }
-        if severitieNumberInt ==3:
+                'number': 4 }
+        if severitieNumberInt == 3:
             return {
                 'name': 'Average',
                 'color': '#FFA059',
                 'number': 3 }
-        if severitieNumberInt == 4:
+        if severitieNumberInt == 2:
             return {
                 'name': 'Warning',
                 'color': '#FFC859',
-                'number': 4 }
-        if severitieNumberInt == 5:
+                'number': 2 }
+        if severitieNumberInt == 1:
             return {
                 'name': 'Information',
                 'color': '#7499FF',
-                'number': 5 }
-        if severitieNumberInt == 6:
+                'number': 1 }
+        if severitieNumberInt == 0:
             return {
                 'name': 'Not classified',
                 'color': '#97AAB3',
-                'number': 6 }
+                'number': 0 }
         return False
+
+    def __zabbixConvertIntToTriggerStatus(problemNumber):
+        problemNumberInt = int(problemNumber)
+        if problemNumberInt == 0:
+            return {
+                'name': 'Resolved',
+                'number': 0,
+                'color': 'green'
+                }
+        if problemNumberInt == 1:
+            return {
+                'name': 'Problem',
+                'number': 1,
+                'color': 'red'
+                }
