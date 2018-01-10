@@ -93,10 +93,31 @@ class zabbixBotClass:
                                                         output='extend',
                                                         expandDescription=1,
                                                         selectHosts=['host'],
+                                                        sortfield='lastchange',
+                                                        sortorder='DESC',
+                                                        limit=10
                                                         )
 
-        print(triggers)
-        zabbixBotClass.chatter.sendMessage("top10", room)
+        this_message = ""
+        for trigger in triggers:
+            """ Example 1
+            this_message =  this_message +\
+                "<u><strong>Timestamp:</u></strong> " + str(time.strftime('%d-%m-%y %H:%m', time.gmtime(int(trigger['lastchange'])))) + '<br>' +\
+                " <u><strong>host:</u></strong> " + trigger['hosts'][0]['host'] + '<br>' +\
+                " <u><strong>Tigger:</u></strong> '" + trigger['description'] + "'" + '<br>' +\
+                " <font color=" + zabbixBotClass.__zabbixConvertIntToSeveritie(trigger['priority'])['color'] + "><u><strong>Severitie:</u></strong> "  + zabbixBotClass.__zabbixConvertIntToSeveritie(trigger['priority'])['name'] + "</font>" + '<br>' +\
+                '<br>'
+            """
+
+            """ Example 2 """
+            this_message = this_message + \
+                str(time.strftime('%d-%m-%y %H:%m', time.gmtime(int(trigger['lastchange'])))) + \
+                " | <font color=#92ff24>" + trigger['hosts'][0]['host'] + "</font>" + \
+                " | <font color=" + zabbixBotClass.__zabbixConvertIntToSeveritie(trigger['priority'])['color'] + ">" + trigger['description'] + "</font>" + \
+                " | <font color=" + zabbixBotClass.__zabbixConvertIntToSeveritie(trigger['priority'])['color'] + ">" + zabbixBotClass.__zabbixConvertIntToSeveritie(trigger['priority'])['name'] + "</font>" + \
+                '<br>'
+
+        zabbixBotClass.chatter.sendMessage(this_message, room)
 
     def __commandoHelp(room):
         zabbixBotClass.chatter.sendMessage("At this moment we do know the following commands:", room)
@@ -128,3 +149,37 @@ class zabbixBotClass:
         #print('Token: %s') % (value)
         print(value)
         return True
+
+    def __zabbixConvertIntToSeveritie(severitieNumber):
+        severitieNumberInt = int(severitieNumber)
+        if severitieNumberInt == 1:
+            return {
+                'name': 'Disaster',
+                'color': '#E45959',
+                'number': 1 }
+        if severitieNumberInt == 2:
+            return {
+                'name': 'High',
+                'color': '#E97659',
+                'number': 2 }
+        if severitieNumberInt ==3:
+            return {
+                'name': 'Average',
+                'color': '#FFA059',
+                'number': 3 }
+        if severitieNumberInt == 4:
+            return {
+                'name': 'Warning',
+                'color': '#FFC859',
+                'number': 4 }
+        if severitieNumberInt == 5:
+            return {
+                'name': 'Information',
+                'color': '#7499FF',
+                'number': 5 }
+        if severitieNumberInt == 6:
+            return {
+                'name': 'Not classified',
+                'color': '#97AAB3',
+                'number': 6 }
+        return False
