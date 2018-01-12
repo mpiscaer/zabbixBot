@@ -5,7 +5,7 @@ class config:
     """
     load the config data
     """
-    def __init__(self, section, configPath = 'config.cfg'):
+    def __init__(self, section, configPath = '/etc/zabbixBot/config.cfg'):
         # load configure items
         with open(configPath, 'r') as ymlfile:
             completeData = yaml.load(ymlfile)

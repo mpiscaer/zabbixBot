@@ -2,9 +2,7 @@ from time import sleep
 from zabbixBotModule.chatConnector import chatConnector
 from zabbixBotModule.config import config
 from pyzabbix import ZabbixAPI
-import yaml
-import logging
-import time
+import yaml, logging, time, json, sys
 
 class zabbixBotClass:
     chatter = ""
@@ -146,6 +144,45 @@ class zabbixBotClass:
         # say(message, room)
         zabbixBotClass.chatter.sendMessage(message, room)
         return True
+
+    def alert(self, message, room):
+        try:
+            message = json.loads(message)
+        except ValueError:
+            raise ZabbixAPIException(
+                "Unable to parse json: %s" % response.text
+            )
+
+        # check if the variables exists
+        if 'priority' not in message:
+            logging.error("Can not find priority in the json message")
+            sys.exit()
+
+        if 'triggerStatus' not in message:
+            logging.error("Can not find triggerStatus in the json message")
+            sys.exit()
+
+        if 'host' not in message:
+            logging.error("Can not find host in the json message")
+            sys.exit()
+
+        if 'description' not in message:
+            logging.error("Can not find description in the json message")
+            sys.exit()
+
+        # composing the message
+        this_message = ""
+        this_message = this_message + \
+            "<font color=" + zabbixBotClass.__zabbixConvertIntToTriggerStatus(message['triggerStatus'])['color'] + ">" + zabbixBotClass.__zabbixConvertIntToTriggerStatus(message['triggerStatus'])['name'] + "</font>"+ \
+            " | <font color=#92ff24>" + message['host'] + "</font>" + \
+            " | <font color=" + zabbixBotClass.__zabbixConvertIntToSeveritie(message['priority'])['color'] + ">" + message['description'] + "</font>" + \
+            " | <font color=" + zabbixBotClass.__zabbixConvertIntToSeveritie(message['priority'])['color'] + \
+            ">" + \
+            zabbixBotClass.__zabbixConvertIntToSeveritie(message['priority'])['name'] + \
+            '</font><br>'
+
+        # sending the message
+        zabbixBotClass.chatter.sendMessage(this_message, room)
 
     def __updatePersistentData(self, item, value):
         #print('Token: %s') % (value)

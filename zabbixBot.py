@@ -10,7 +10,8 @@ def help():
     print('-h, --help                         display this help and exit')
     print('-d, --daemon                       listen for messages in deamon mode')
     print('-s, --standalone                   listen for messages in in standalone mode')
-    print('    --say                          say something in a room --room is mandatory')
+    print('    --say                          say something in a room, --room is mandatory')
+    print('-a  --alert                        send an alert to a room, --room is mandatory')
     print('    --room                         the room where the message needs tobe said')
     print('    --message                      the message is optional if not specified it will be via STDIN')
 
@@ -19,7 +20,7 @@ def main(argv):
     room = ""
 
     try:
-        opts, args = getopt.getopt(argv,"shd", ["help", "daemon", "standalone", "say", "message=", "room="])
+        opts, args = getopt.getopt(argv,"shda", ["help", "daemon", "standalone", "say", "message=", "room=", "alert"])
     except getopt.GetoptError:
         help()
         sys.exit(2)
@@ -44,6 +45,8 @@ def main(argv):
             zabbixBot = zabbixBotClass()
             zabbixBot.standalone()
             sys.exit()
+        elif opt in ("-a", "--alert"):
+            mode = "alert"
         elif opt in ("--say"):
             mode = "say"
         elif opt in ("--room"):
@@ -58,6 +61,25 @@ def main(argv):
     elif mode == "say":
         help()
         sys.exit()
+
+    if mode == "alert" and room != "" and message != "":
+        sendAlert(room, message)
+    elif mode == "alert" and room != "":
+        sendAlert(room, None)
+    elif mode == "alert":
+        help()
+        sys.exit()
+
+def sendAlert(room, message=None):
+    zabbixBot = zabbixBotClass()
+    if message == "" or message is None:
+        inputBuffer = ""
+        for line in fileinput.input('-'):
+            #zabbixBot.say(line, room)
+            inputBuffer += line
+        zabbixBot.alert(inputBuffer, room)
+    else:
+        zabbixBot.alert(inputBuffer, room)
 
 def saySomething(room, message=None):
     zabbixBot = zabbixBotClass()
