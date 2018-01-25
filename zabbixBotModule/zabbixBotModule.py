@@ -147,6 +147,9 @@ class zabbixBotClass:
                 " | <font color=" + zabbixBotClass.__zabbixConvertIntToSeveritie(trigger['priority'])['color'] + ">" + zabbixBotClass.__zabbixConvertIntToSeveritie(trigger['priority'])['name'] + "</font>" + \
                 '<br>'
 
+        # no triggers found
+        if len(this_message) == 0:
+            this_message = "No triggers found"
         zabbixBotClass.chatter.sendMessage(this_message, room)
 
     def __commandoHelp(room):
