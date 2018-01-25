@@ -70,7 +70,20 @@ class zabbixBotClass:
         # check if if the was commando
         if message.startswith("!"):
             if message.startswith("!top10"):
-                zabbixBotClass.__commandoTop10(room)
+                severities = None
+                # get the parameters of the command and lowercase them.
+                # and the if the option is posible
+                if message[7:].lower().startswith(("high")):
+                    severities = 4
+                if message[7:].lower().startswith(("average")):
+                    severities = 3
+                if message[7:].lower().startswith(("warning")):
+                    severities = 2
+                if message[7:].lower().startswith(("information")):
+                    severities = 1
+
+                zabbixBotClass.__commandoTop10(room, severities)
+
             elif message.startswith("!help"):
                 zabbixBotClass.__commandoHelp(room)
             else:
@@ -80,22 +93,39 @@ class zabbixBotClass:
         # There was an unknown command
         zabbixBotClass.chatter.sendMessage("I do not know this commando", room)
 
-    def __commandoTop10(room):
+    def __commandoTop10(room, severitie=None):
         # There was asked for the top10 zabbix triggers
 
-        # get the zabbix triggers
-        triggers = zabbixBotClass.zabbix.trigger.get(   only_true=1,
-                                                        skipDependent=1,
-                                                        monitored=1,
-                                                        active=1,
-                                                        output='extend',
-                                                        expandDescription=1,
-                                                        selectHosts=['host'],
-                                                        sortfield='lastchange',
-                                                        sortorder='DESC',
-                                                        limit=10,
-                                                        maintenance=False
-                                                        )
+        logging.error("    severitie: " + str(severitie))
+
+        if severitie is None:
+            # get the zabbix triggers
+            triggers = zabbixBotClass.zabbix.trigger.get(   only_true=1,
+                                                            skipDependent=1,
+                                                            monitored=1,
+                                                            active=1,
+                                                            output='extend',
+                                                            expandDescription=1,
+                                                            selectHosts=['host'],
+                                                            sortfield='lastchange',
+                                                            sortorder='DESC',
+                                                            limit=10,
+                                                            maintenance=False )
+
+        else:
+            # get the zabbix triggers
+            triggers = zabbixBotClass.zabbix.trigger.get(   only_true=1,
+                                                            min_severity=severitie,
+                                                            skipDependent=1,
+                                                            monitored=1,
+                                                            active=1,
+                                                            output='extend',
+                                                            expandDescription=1,
+                                                            selectHosts=['host'],
+                                                            sortfield='lastchange',
+                                                            sortorder='DESC',
+                                                            limit=10,
+                                                            maintenance=False )
 
         this_message = ""
         for trigger in triggers:
@@ -121,7 +151,7 @@ class zabbixBotClass:
 
     def __commandoHelp(room):
         zabbixBotClass.chatter.sendMessage("At this moment we do know the following commands:", room)
-        zabbixBotClass.chatter.sendMessage("<li>!top10</li>", room)
+        zabbixBotClass.chatter.sendMessage("<li>!top10 severity</li>", room)
         zabbixBotClass.chatter.sendMessage("<li>!help</li>", room)
 
     def standalone(self):
