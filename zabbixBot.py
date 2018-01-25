@@ -1,4 +1,4 @@
-#!/usr/bin/python3.5
+#!/usr/bin/python3
 from zabbixBotModule.zabbixBotModule import zabbixBotClass
 import sys, getopt
 from sys import stdin
